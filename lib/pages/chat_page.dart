@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/chat_bubble.dart';
 import 'package:flutter_application_1/components/my_text_field.dart';
 import 'package:flutter_application_1/services/chat/chat_service.dart';
+import 'package:flutter_application_1/components/input_text_field.dart';
 
 class ChatPage extends StatefulWidget {
   final String receiverUserEmail;
@@ -113,12 +114,12 @@ class _ChatPageState extends State<ChatPage> {
       child: Row(
         children: [
           Expanded(
-            child: MyTextField(
-              controller: _messageController,
-              hintText: 'Введите сообщение',
-              obscureText: false,
-            ),
-          ),
+              child: CustomInputTextField(
+            controller: _messageController,
+            obscureText: false,
+            hintText: "Сообщение",
+            textCapitalization: TextCapitalization.words,
+          )),
           IconButton(
             onPressed: sendMessage,
             icon: const Icon(
