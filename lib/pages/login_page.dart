@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/components/my_button.dart';
 import 'package:flutter_application_1/components/my_text_field.dart';
+import 'package:flutter_application_1/services/auth/auth_services.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   final void Function()? onTap;
@@ -12,14 +13,26 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-//авторизация пользователя 
-void logIn() {
-
-}
 class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
+//авторизация пользователя
+  void logIn() async {
+//получение данных от auth service
+    final authService = Provider.of<AuthService>(context, listen: false);
+    try {
+      await authService.signInWithEmailandPassword(
+          emailController.text, passwordController.text);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,28 +43,22 @@ class _LoginPageState extends State<LoginPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
-            mainAxisAlignment:MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.beenhere, 
-                  size: 80
-                  ),
-                  
+                Icon(Icons.beenhere, size: 80),
                 Text("Beesiness broker"),
                 const SizedBox(height: 70),
-                Text("Давно не виделись!"), 
+                Text("Давно не виделись!"),
                 const SizedBox(height: 10),
                 MyTextField(
-                  controller: emailController, 
-                  hintText: 'Email', 
-                  obscureText: false
-                  ),
+                    controller: emailController,
+                    hintText: 'Email',
+                    obscureText: false),
                 const SizedBox(height: 10),
                 MyTextField(
-                  controller: passwordController, 
-                  hintText: 'Пароль', 
-                  obscureText: true
-                  ),
+                    controller: passwordController,
+                    hintText: 'Пароль',
+                    obscureText: true),
                 const SizedBox(height: 15),
                 MyButton(onTap: logIn, text: "Войти"),
                 const SizedBox(height: 15),
@@ -64,10 +71,8 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: widget.onTap,
                       child: const Text(
                         "Зарегистрируйтесь",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold
-                        ),
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     )
                   ],
                 )
