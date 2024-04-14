@@ -45,8 +45,8 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.beenhere, size: 80),
-                Text("Beesiness broker"),
+                Icon(Icons.remove_red_eye, size: 80),
+                Text("Приложение-квест"),
                 const SizedBox(height: 70),
                 Text("Давно не виделись!"),
                 const SizedBox(height: 10),

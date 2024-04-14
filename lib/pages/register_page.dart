@@ -55,8 +55,8 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.beenhere, size: 80),
-                Text("Beesiness broker"),
+                Icon(Icons.remove_red_eye, size: 80),
+                Text("Приложение-квест"),
                 const SizedBox(height: 70),
                 Text("Давайте создадим вам аккаунт!"),
                 const SizedBox(height: 15),

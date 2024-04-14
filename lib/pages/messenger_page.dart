@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/chat_bubble.dart';
 import 'package:flutter_application_1/pages/events_page.dart';
 import 'package:flutter_application_1/pages/profile_page.dart';
+import 'package:flutter_application_1/pages/team_page.dart';
 import 'package:flutter_application_1/services/auth/auth_services.dart';
 import 'package:provider/provider.dart';
 
 import 'chat_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -19,11 +20,18 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   int _currentIndex = 0;
-  String pageName = "Пользователи";
+  TextEditingController _searchController = TextEditingController();
+  String _searchText = "";
+  String pageName = "Чаты";
+  var pages = [
+    HomePage(),
+    EventPage(),
+    TeamPage(),
+    ProfilePage(),
+  ];
 
   void signOut() {
     final authService = Provider.of<AuthService>(context, listen: false);
-
     authService.logOut();
   }
 
@@ -31,12 +39,19 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(pageName),
+        title: Text(
+          pageName,
+          textAlign: TextAlign.center,
+        ),
         actions: [
-          IconButton(onPressed: signOut, icon: Icon(Icons.logout_rounded))
+          IconButton(
+            onPressed: signOut,
+            icon: Icon(Icons.logout_rounded),
+          ),
         ],
+        centerTitle: true,
       ),
-      body: _currentIndex == 0 ? _createUserList() : Container(),
+      body: _currentIndex == 0 ? _buildBody() : pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
@@ -45,7 +60,11 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
             label: "Мероприятия",
-            icon: Icon(Icons.people),
+            icon: Icon(Icons.event),
+          ),
+          BottomNavigationBarItem(
+            label: "Моя команда",
+            icon: Icon(Icons.people_rounded),
           ),
           BottomNavigationBarItem(
             label: "Профиль",
@@ -59,27 +78,75 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildBody() {
+    return Column(
+      children: [
+        _buildSearchField(),
+        Expanded(child: _createUserList()),
+      ],
+    );
+  }
+
+  Widget _buildSearchField() {
+    return Container(
+      margin: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Stack(
+        alignment: Alignment.centerRight,
+        children: [
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Поиск пользователей',
+              prefixIcon: Icon(Icons.search),
+              border: InputBorder.none,
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchText = value.toLowerCase();
+              });
+            },
+          ),
+          if (_searchController.text.isNotEmpty)
+            Positioned(
+              right: 8,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _searchController.clear();
+                    _searchText = '';
+                  });
+                },
+                child: Icon(Icons.clear),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   void _onItemSelected(int index) {
     setState(() {
       _currentIndex = index;
     });
-    switch (_currentIndex) {
-      case 0:
-        pageName = "Пользователи";
-        HomePage();
-        break;
-      case 1:
-        pageName = "Мероприятия";
-        EventPage();
-        break;
-      case 2:
-        pageName = "Мой профиль";
-        ProfilePage();
-        break;
+    if (_currentIndex == 0) {
+      pageName = "Чаты";
+      _searchText = ""; // Сбросить текст поиска при переходе на страницу "Чаты"
+    }
+    if (_currentIndex == 1) {
+      pageName = "Мероприятия";
+    }
+    if (_currentIndex == 2) {
+      pageName = "Команды";
+    }
+    if (_currentIndex == 3) {
+      pageName = "Мой профиль";
     }
   }
 
-  //вывести список всех пользователей кроме текущего
   Widget _createUserList() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('users').snapshots(),
@@ -92,8 +159,17 @@ class _HomePageState extends State<HomePage> {
           return const Text('Загрузка...');
         }
 
+        var filteredUsers = snapshot.data!.docs.where((doc) {
+          Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
+          return _auth.currentUser!.email != data['email'] &&
+              (data['email'] as String).toLowerCase().contains(_searchText);
+        }).toList();
+
         return ListView(
-          children: snapshot.data!.docs
+          shrinkWrap: true,
+          physics:
+              ClampingScrollPhysics(), // Отключение прокрутки для списка пользователей
+          children: filteredUsers
               .map<Widget>((doc) => _createUserListItem(doc))
               .toList(),
         );
@@ -101,16 +177,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // создание сущности пользователя в списке пользователя
   Widget _createUserListItem(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
 
-    //вывести всех пользователей кроме текущего
     if (_auth.currentUser!.email != data['email']) {
       return ListTile(
         title: ChatBubble(message: data['email']),
         onTap: () {
-          //перебросить в чат
           Navigator.push(
             context,
             MaterialPageRoute(

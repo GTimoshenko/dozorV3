@@ -98,6 +98,7 @@ class _ChatPageState extends State<ChatPage> {
                   ? MainAxisAlignment.end
                   : MainAxisAlignment.start,
           children: [
+            Icon(Icons.account_circle_rounded),
             Text(data['senderEmail']),
             const SizedBox(height: 7),
             ChatBubble(message: data['message']),
