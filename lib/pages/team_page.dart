@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/input_text_field.dart';
 import 'package:flutter_application_1/components/my_text_field.dart';
 import 'package:flutter_application_1/pages/choose_users.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/pages/my_teams.dart';
 
 class TeamPage extends StatefulWidget {
   const TeamPage({Key? key});
@@ -13,6 +16,30 @@ class TeamPage extends StatefulWidget {
 class _TeamPageState extends State<TeamPage> {
   final teamNameController = TextEditingController();
   final List<String> teamMemberEmails = [];
+
+  bool _isCaptain =
+      false; // Переменная для хранения информации о том, является ли пользователь капитаном
+
+  @override
+  void initState() {
+    super.initState();
+    // Проверяем, является ли пользователь капитаном при загрузке страницы
+    checkIsCaptain();
+  }
+
+  // Функция для проверки, является ли пользователь капитаном какой-либо команды
+  void checkIsCaptain() async {
+    final user = FirebaseAuth.instance.currentUser;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('teams')
+        .where('captain', isEqualTo: user!.uid)
+        .get();
+    // Если пользователь капитан какой-либо команды, устанавливаем _isCaptain в true
+    setState(() {
+      _isCaptain = querySnapshot.docs.isNotEmpty;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,40 +74,60 @@ class _TeamPageState extends State<TeamPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Проверяем, содержит ли поле название команды какой-либо текст
-                    if (teamNameController.text.isNotEmpty) {
-                      // Если содержит, переходим на следующую страницу
+                    // Если пользователь капитан какой-либо команды, показываем все команды
+                    if (_isCaptain) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              ChooseUsers(teamName: teamNameController),
+                          builder: (context) => MyTeam(),
                         ),
                       );
                     } else {
-                      // Если поле пустое, можно показать пользователю сообщение или ничего не делать
-                      // Например, показать всплывающее окно с предупреждением:
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('Пустое название команды'),
-                            content:
-                                Text('Пожалуйста, введите название команды.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text('OK'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                      // Если поле название команды не пустое, переходим на страницу выбора пользователей
+                      if (teamNameController.text.isNotEmpty) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChooseUsers(
+                              teamName: teamNameController,
+                            ),
+                          ),
+                        );
+                      } else {
+                        // Если поле пустое, можно показать пользователю сообщение или ничего не делать
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Пустое название команды'),
+                              content:
+                                  Text('Пожалуйста, введите название команды.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     }
                   },
                   child: Text("Далее"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MyTeam(),
+                      ),
+                    );
+                  },
+                  child: Text("Посмотреть мои команды"),
                 ),
               ],
             ),

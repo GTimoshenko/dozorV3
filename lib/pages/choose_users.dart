@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/components/my_button.dart';
+import 'package:flutter_application_1/pages/my_teams.dart';
 import 'chat_page.dart';
 
 class ChooseUsers extends StatefulWidget {
@@ -27,7 +28,7 @@ class _ChooseUsersState extends State<ChooseUsers> {
           IconButton(
             icon: Icon(Icons.arrow_forward_ios_outlined),
             onPressed: () {
-              // Обработка нажатия на стрелку
+              createTeam(context, widget.teamName, selectedUsers);
             },
           ),
         ],
@@ -128,17 +129,65 @@ class _ChooseUsersState extends State<ChooseUsers> {
           });
         },
       ),
-      onTap: () {
+    );
+  }
+
+  void createTeam(
+    BuildContext context,
+    TextEditingController teamNameController,
+    List<String> selectedUsers,
+  ) async {
+    final String? teamName = teamNameController.text.trim();
+    final String? captainId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (teamName != null && captainId != null && selectedUsers.isNotEmpty) {
+      var userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(captainId)
+          .get();
+      selectedUsers.add(userDoc['email']);
+
+      DocumentReference teamRef =
+          FirebaseFirestore.instance.collection('teams').doc();
+
+      Map<String, dynamic> teamData = {
+        'id': teamRef.id,
+        'name': teamName,
+        'members': selectedUsers,
+        'createdBy': captainId,
+      };
+
+      try {
+        await teamRef.set(teamData);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ChatPage(
-              receiverUserEmail: userEmail,
-              receiverUserId: data['uid'],
-            ),
+            builder: (context) => MyTeam(),
           ),
         );
-      },
-    );
+      } catch (e) {
+        print('Ошибка при сохранении данных в Firestore: $e');
+      }
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Ошибка'),
+            content: Text(
+              'Название команды и идентификатор капитана не могут быть пустыми, и должны быть выбраны участники',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 }
