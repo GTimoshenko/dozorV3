@@ -48,11 +48,11 @@ class _TeamChatPageState extends State<TeamChatPage> {
       child: Row(
         children: [
           Expanded(
-            child: TextField(
+            child: CustomInputTextField(
               controller: _messageController,
-              decoration: InputDecoration(
-                hintText: 'Enter your message...',
-              ),
+              hintText: 'Сообщение',
+              obscureText: false,
+              textCapitalization: TextCapitalization.words,
             ),
           ),
           IconButton(
