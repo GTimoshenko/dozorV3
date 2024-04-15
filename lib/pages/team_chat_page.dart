@@ -75,10 +75,17 @@ class _TeamChatPageState extends State<TeamChatPage> {
           return const Text('Loading...');
         }
 
+        // Сортируем сообщения по timestamp в прямом порядке
+        final sortedMessages = snapshot.data!.docs
+            .where((document) =>
+                widget.receiverUserIds.contains(document['senderId']))
+            .toList()
+          ..sort((a, b) => (a['timestamp'] as Timestamp)
+              .compareTo(b['timestamp'] as Timestamp));
+
         return ListView(
-          children: snapshot.data!.docs
-              .where((document) =>
-                  widget.receiverUserIds.contains(document['senderId']))
+          // Используем отсортированные сообщения
+          children: sortedMessages
               .map((document) => _createMessageItem(document))
               .toList(),
         );
