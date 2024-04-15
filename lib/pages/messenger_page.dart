@@ -19,16 +19,22 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  int _currentIndex = 0;
+  int _currentIndex = 2;
   TextEditingController _searchController = TextEditingController();
   String _searchText = "";
-  String pageName = "Чаты";
-  var pages = [
-    HomePage(),
-    EventPage(),
-    TeamPage(),
-    ProfilePage(),
-  ];
+  String pageName = "Команды";
+  late List<Widget> pages; // Объявляем список страниц здесь
+
+  @override
+  void initState() {
+    super.initState();
+    pages = [
+      HomePage(),
+      EventPage(),
+      TeamPage(),
+      ProfilePage()
+    ]; // Инициализируем список страниц
+  }
 
   void signOut() {
     final authService = Provider.of<AuthService>(context, listen: false);
@@ -51,7 +57,10 @@ class _HomePageState extends State<HomePage> {
         ],
         centerTitle: true,
       ),
-      body: _currentIndex == 0 ? _buildBody() : pages[_currentIndex],
+      body: _currentIndex == 0
+          ? _buildBody()
+          : pages[
+              _currentIndex], // Используем pages[_currentIndex] для отображения выбранной страницы
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(

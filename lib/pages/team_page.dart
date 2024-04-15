@@ -24,20 +24,6 @@ class _TeamPageState extends State<TeamPage> {
   void initState() {
     super.initState();
     // Проверяем, является ли пользователь капитаном при загрузке страницы
-    checkIsCaptain();
-  }
-
-  // Функция для проверки, является ли пользователь капитаном какой-либо команды
-  void checkIsCaptain() async {
-    final user = FirebaseAuth.instance.currentUser;
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('teams')
-        .where('captain', isEqualTo: user!.uid)
-        .get();
-    // Если пользователь капитан какой-либо команды, устанавливаем _isCaptain в true
-    setState(() {
-      _isCaptain = querySnapshot.docs.isNotEmpty;
-    });
   }
 
   @override
@@ -74,46 +60,39 @@ class _TeamPageState extends State<TeamPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Если пользователь капитан какой-либо команды, показываем все команды
-                    if (_isCaptain) {
+                    // Если пользователь капитан какой-либо команды, показываем все команд
+
+                    // Если поле название команды не пустое, переходим на страницу выбора пользователей
+                    if (teamNameController.text.isNotEmpty) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => MyTeam(),
+                          builder: (context) => ChooseUsers(
+                            teamName: teamNameController,
+                            isNew: true,
+                          ),
                         ),
                       );
                     } else {
-                      // Если поле название команды не пустое, переходим на страницу выбора пользователей
-                      if (teamNameController.text.isNotEmpty) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChooseUsers(
-                              teamName: teamNameController,
-                            ),
-                          ),
-                        );
-                      } else {
-                        // Если поле пустое, можно показать пользователю сообщение или ничего не делать
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text('Пустое название команды'),
-                              content:
-                                  Text('Пожалуйста, введите название команды.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text('OK'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
+                      // Если поле пустое, можно показать пользователю сообщение или ничего не делать
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Пустое название команды'),
+                            content:
+                                Text('Пожалуйста, введите название команды.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
                     }
                   },
                   child: Text("Далее"),
@@ -123,7 +102,9 @@ class _TeamPageState extends State<TeamPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MyTeam(),
+                        builder: (context) => MyTeam(
+                          shouldReload: true,
+                        ),
                       ),
                     );
                   },

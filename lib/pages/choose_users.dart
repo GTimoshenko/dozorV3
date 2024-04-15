@@ -2,12 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/components/my_button.dart';
+import 'package:flutter_application_1/pages/my_team_page.dart';
 import 'package:flutter_application_1/pages/my_teams.dart';
 import 'chat_page.dart';
 
 class ChooseUsers extends StatefulWidget {
   final TextEditingController teamName;
-  const ChooseUsers({Key? key, required this.teamName}) : super(key: key);
+  final bool isNew;
+  const ChooseUsers({Key? key, required this.teamName, required this.isNew})
+      : super(key: key);
 
   @override
   State<ChooseUsers> createState() => _ChooseUsersState();
@@ -159,10 +162,13 @@ class _ChooseUsersState extends State<ChooseUsers> {
 
       try {
         await teamRef.set(teamData);
-        Navigator.push(
+        Navigator.pushReplacement(
+          // Изменение здесь
           context,
           MaterialPageRoute(
-            builder: (context) => MyTeam(),
+            builder: (context) => MyTeamPage(
+              teamId: teamData['id'],
+            ),
           ),
         );
       } catch (e) {
