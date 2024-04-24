@@ -53,7 +53,59 @@ class ProfilePage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => AboutPage()),
                   );
                 },
-                child: Text('О программе'),
+                child: Text('О приложении'),
+              ),
+
+              ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Поздравляем!'),
+                        content: Text(
+                            'Теперь вы стали организатором и можете создавать свои мероприятия.'),
+                        actions: <Widget>[
+                          ButtonBar(
+                            alignment: MainAxisAlignment
+                                .center, // Выравнивание кнопки "OK" по центру
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(
+                                      context); // Закрываем диалоговое окно
+                                },
+                                child: Text(
+                                  'OK',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          const Color.fromARGB(255, 155, 132,
+                                              197)), // Цвет кнопки "OK"
+                                  shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          18.0), // Задаем скругленные углы
+                                      side: BorderSide(
+                                          color: const Color.fromARGB(255, 155,
+                                              132, 197)), // Добавляем обводку
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: Text('Стать организатором'),
               ),
             ],
           ),
