@@ -8,11 +8,13 @@ import 'package:flutter_application_1/services/chat/group_chat_service.dart';
 class TeamChatPage extends StatefulWidget {
   final List<String> receiverUserEmails;
   final List<String> receiverUserIds;
+  final String teamName;
 
   const TeamChatPage({
     Key? key,
     required this.receiverUserEmails,
     required this.receiverUserIds,
+    required this.teamName,
   }) : super(key: key);
 
   @override
@@ -27,7 +29,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Team Chat')),
+      appBar: AppBar(title: Text('${widget.teamName}')),
       body: Column(
         children: [
           Expanded(
@@ -78,7 +80,10 @@ class _TeamChatPageState extends State<TeamChatPage> {
         // Сортируем сообщения по timestamp в прямом порядке
         final sortedMessages = snapshot.data!.docs
             .where((document) =>
-                widget.receiverUserIds.contains(document['senderId']))
+                widget.receiverUserIds.contains(document['senderId']) &&
+                document['teamName'] ==
+                    widget
+                        .teamName) // Проверяем, что поле teamName совпадает с переданным в виджет
             .toList()
           ..sort((a, b) => (a['timestamp'] as Timestamp)
               .compareTo(b['timestamp'] as Timestamp));
@@ -125,6 +130,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
         _messageController.text,
         _firebaseAuth.currentUser!.uid,
         widget.receiverUserEmails,
+        widget.teamName,
       );
 
       _messageController.clear();

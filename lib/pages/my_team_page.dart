@@ -96,8 +96,7 @@ class MyTeamPage extends StatelessWidget {
                   if (snapshot.hasError) {
                     return Center(child: Text('Ошибка: ${snapshot.error}'));
                   }
-                  print(snapshot.data ?? []);
-                  print(members);
+
                   return SizedBox(
                     width: 300,
                     child: ElevatedButton(
@@ -108,6 +107,7 @@ class MyTeamPage extends StatelessWidget {
                             builder: (context) => TeamChatPage(
                               receiverUserIds: snapshot.data ?? [],
                               receiverUserEmails: members,
+                              teamName: teamName,
                             ),
                           ),
                         );

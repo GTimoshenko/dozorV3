@@ -10,6 +10,7 @@ class GroupChatService {
     String message,
     String senderId,
     List<String> receiverUserEmails,
+    String teamName,
   ) async {
     final userData = await _firestore.collection('users').get();
     final senderData = userData.docs.firstWhere(
@@ -22,6 +23,7 @@ class GroupChatService {
       'message': message,
       'senderId': senderId,
       'senderEmail': senderData.data()['email'],
+      'teamName': teamName,
       'timestamp': Timestamp.now(),
     };
 

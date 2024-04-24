@@ -7,6 +7,7 @@ class GroupChatMessage {
   List<String>
       receiverEmails; // Add this line to include the receiverEmails list
   String message;
+  String teamName;
   Timestamp timestamp;
 
   GroupChatMessage({
@@ -15,6 +16,7 @@ class GroupChatMessage {
     required this.receiverIds,
     required this.receiverEmails, // Add this line to include the receiverEmails list
     required this.message,
+    required this.teamName,
     required this.timestamp,
   });
 
@@ -26,6 +28,7 @@ class GroupChatMessage {
       'receiverEmails':
           receiverEmails, // Add this line to include the receiverEmails list
       'message': message,
+      'teamName': teamName,
       'timestamp': timestamp,
     };
   }
