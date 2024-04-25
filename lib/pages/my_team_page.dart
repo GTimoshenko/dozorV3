@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/components/team_bubble.dart';
@@ -122,20 +123,83 @@ class MyTeamPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     try {
-                      await FirebaseFirestore.instance
-                          .collection('teams')
-                          .doc(teamId)
-                          .delete();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MyTeam(
-                            shouldReload: true,
-                          ),
-                        ),
-                      );
+                      // Получаем текущего пользователя
+                      User? currentUser = FirebaseAuth.instance.currentUser;
 
-                      // Возвращаемся на предыдущий экран после удаления
+                      // Получаем данные о команде из Firestore
+                      DocumentSnapshot<Map<String, dynamic>> teamSnapshot =
+                          await FirebaseFirestore.instance
+                              .collection('teams')
+                              .doc(teamId)
+                              .get();
+
+                      // Получаем электронную почту капитана команды из данных о команде
+                      String? createdBy = teamSnapshot['createdBy'];
+
+                      // Проверяем, совпадает ли электронная почта текущего пользователя с электронной почтой капитана команды
+                      if (currentUser?.uid == createdBy) {
+                        print(currentUser?.uid);
+                        print(createdBy);
+                        // Если совпадает, удаляем команду
+                        await FirebaseFirestore.instance
+                            .collection('teams')
+                            .doc(teamId)
+                            .delete();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyTeam(
+                              shouldReload: true,
+                            ),
+                          ),
+                        );
+                      } else {
+                        // Если не совпадает, показываем всплывающее предупреждение
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Ошибка'),
+                              content: Text(
+                                  'Вы должны быть капитаном, чтобы удалить команду'),
+                              actions: <Widget>[
+                                ButtonBar(
+                                  alignment: MainAxisAlignment.center,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text(
+                                        'OK',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all<Color>(
+                                                const Color.fromARGB(
+                                                    255, 155, 132, 197)),
+                                        shape: MaterialStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(18.0),
+                                            side: BorderSide(
+                                                color: const Color.fromARGB(
+                                                    255, 155, 132, 197)),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     } catch (error) {
                       print('Ошибка при удалении команды: $error');
                     }

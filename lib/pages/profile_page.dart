@@ -53,8 +53,14 @@ class ProfilePage extends StatelessWidget {
                   );
                 },
                 child: Text('О приложении'),
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(
+                      Size(200, 48)), // Задаем фиксированный размер кнопки
+                ),
               ),
-
+              SizedBox(
+                height: 10,
+              ),
               ElevatedButton(
                 onPressed: () async {
                   try {
@@ -119,8 +125,14 @@ class ProfilePage extends StatelessWidget {
                   }
                 },
                 child: Text('Стать организатором'),
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(
+                      Size(200, 48)), // Задаем фиксированный размер кнопки
+                ),
               ),
-
+              SizedBox(
+                height: 10,
+              ),
               ElevatedButton(
                 onPressed: () async {
                   try {
@@ -156,6 +168,10 @@ class ProfilePage extends StatelessWidget {
                   }
                 },
                 child: Text('Удалить аккаунт'),
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(
+                      Size(200, 48)), // Задаем фиксированный размер кнопки
+                ),
               ),
             ],
           ),

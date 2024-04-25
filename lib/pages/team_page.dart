@@ -39,7 +39,7 @@ class _TeamPageState extends State<TeamPage> {
                   height: 70,
                 ),
                 Icon(
-                  Icons.group,
+                  Icons.group_outlined,
                   size: 80,
                 ),
                 Text(
@@ -60,7 +60,7 @@ class _TeamPageState extends State<TeamPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Если пользователь капитан какой-либо команды, показываем все команд
+                    // Если пользователь капитан какой-либо команды, показываем все команды
 
                     // Если поле название команды не пустое, переходим на страницу выбора пользователей
                     if (teamNameController.text.isNotEmpty) {
@@ -73,6 +73,7 @@ class _TeamPageState extends State<TeamPage> {
                           ),
                         ),
                       );
+                      teamNameController.clear();
                     } else {
                       // Если поле пустое, можно показать пользователю сообщение или ничего не делать
                       showDialog(
@@ -81,11 +82,11 @@ class _TeamPageState extends State<TeamPage> {
                           return AlertDialog(
                             title: Text('Пустое название команды!'),
                             content: Text(
-                                'Чтобы создать команду, введите ее название.'),
+                              'Чтобы создать команду, введите ее название.',
+                            ),
                             actions: <Widget>[
                               ButtonBar(
-                                alignment: MainAxisAlignment
-                                    .center, // Выравнивание кнопки "OK" по центру
+                                alignment: MainAxisAlignment.center,
                                 children: [
                                   TextButton(
                                     onPressed: () {
@@ -101,24 +102,23 @@ class _TeamPageState extends State<TeamPage> {
                                     style: ButtonStyle(
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
-                                              const Color.fromARGB(
-                                                  255,
-                                                  155,
-                                                  132,
-                                                  197)), // Цвет кнопки "OK"
+                                        const Color.fromARGB(
+                                            255, 155, 132, 197),
+                                      ),
                                       shape: MaterialStateProperty.all<
                                           RoundedRectangleBorder>(
                                         RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              18.0), // Задаем скругленные углы
+                                          borderRadius:
+                                              BorderRadius.circular(18.0),
                                           side: BorderSide(
-                                              color: const Color.fromARGB(
-                                                  255,
-                                                  155,
-                                                  132,
-                                                  197)), // Добавляем обводку
+                                            color: const Color.fromARGB(
+                                                255, 155, 132, 197),
+                                          ),
                                         ),
                                       ),
+                                      minimumSize: MaterialStateProperty.all(Size(
+                                          200,
+                                          48)), // Задаем фиксированный размер кнопки
                                     ),
                                   ),
                                 ],
@@ -130,6 +130,13 @@ class _TeamPageState extends State<TeamPage> {
                     }
                   },
                   child: Text("Далее"),
+                  style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all(
+                        Size(200, 48)), // Задаем фиксированный размер кнопки
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -143,6 +150,10 @@ class _TeamPageState extends State<TeamPage> {
                     );
                   },
                   child: Text("Посмотреть мои команды"),
+                  style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all(
+                        Size(200, 48)), // Задаем фиксированный размер кнопки
+                  ),
                 ),
               ],
             ),

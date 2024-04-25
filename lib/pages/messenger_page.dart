@@ -68,8 +68,8 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.message),
           ),
           BottomNavigationBarItem(
-            label: "Мероприятия",
-            icon: Icon(Icons.event),
+            label: "Квесты",
+            icon: Icon(Icons.casino),
           ),
           BottomNavigationBarItem(
             label: "Моя команда",
@@ -146,7 +146,7 @@ class _HomePageState extends State<HomePage> {
       _searchText = ""; // Сбросить текст поиска при переходе на страницу "Чаты"
     }
     if (_currentIndex == 1) {
-      pageName = "Мероприятия";
+      pageName = "Квесты";
     }
     if (_currentIndex == 2) {
       pageName = "Команды";
