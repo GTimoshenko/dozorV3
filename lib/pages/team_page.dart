@@ -73,7 +73,6 @@ class _TeamPageState extends State<TeamPage> {
                           ),
                         ),
                       );
-                      teamNameController.clear();
                     } else {
                       // Если поле пустое, можно показать пользователю сообщение или ничего не делать
                       showDialog(

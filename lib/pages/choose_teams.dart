@@ -1,37 +1,32 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/components/my_button.dart';
-import 'package:flutter_application_1/pages/my_team_page.dart';
-import 'package:flutter_application_1/pages/my_teams.dart';
-import 'chat_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/pages/my_event_page.dart';
 
-class ChooseUsers extends StatefulWidget {
-  final TextEditingController teamName;
-  final bool isNew;
-  const ChooseUsers({Key? key, required this.teamName, required this.isNew})
-      : super(key: key);
+class ChooseTeams extends StatefulWidget {
+  final TextEditingController eventName;
+  const ChooseTeams({Key? key, required this.eventName}) : super(key: key);
 
   @override
-  State<ChooseUsers> createState() => _ChooseUsersState();
+  State<ChooseTeams> createState() => _ChooseTeamsState();
 }
 
-class _ChooseUsersState extends State<ChooseUsers> {
+class _ChooseTeamsState extends State<ChooseTeams> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
-  List<String> selectedUsers = [];
+  List<String> selectedTeams = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Выберите пользователей'),
+        title: Text('Выберите команды'),
         actions: [
           IconButton(
-            icon: Icon(Icons.arrow_forward_ios_outlined),
+            icon: Icon(Icons.check),
             onPressed: () {
-              createTeam(context, widget.teamName, selectedUsers);
+              createEvent(context, selectedTeams);
             },
           ),
         ],
@@ -39,7 +34,7 @@ class _ChooseUsersState extends State<ChooseUsers> {
       body: Column(
         children: [
           _buildSearchField(),
-          Expanded(child: _createUserList()),
+          Expanded(child: _createTeamList()),
         ],
       ),
     );
@@ -58,7 +53,7 @@ class _ChooseUsersState extends State<ChooseUsers> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: 'Поиск пользователей',
+              hintText: 'Поиск команд',
               prefixIcon: Icon(Icons.search),
               border: InputBorder.none,
             ),
@@ -86,48 +81,48 @@ class _ChooseUsersState extends State<ChooseUsers> {
     );
   }
 
-  Widget _createUserList() {
+  Widget _createTeamList() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').snapshots(),
+      stream: FirebaseFirestore.instance.collection('teams').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Text('Ошибка');
+          return Text('Ошибка: ${snapshot.error}');
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text('Загрузка...');
+          return Center(child: CircularProgressIndicator());
         }
 
-        var filteredUsers = snapshot.data!.docs.where((doc) {
-          Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
-          return _auth.currentUser!.email != data['email'] &&
-              (data['email'] as String).toLowerCase().contains(_searchText);
+        var filteredTeams = snapshot.data!.docs.where((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          return (data['name'] as String).toLowerCase().contains(_searchText);
         }).toList();
 
         return ListView.builder(
-          itemCount: filteredUsers.length,
+          itemCount: filteredTeams.length,
           itemBuilder: (context, index) {
-            return _createUserListItem(filteredUsers[index]);
+            return _createTeamListItem(filteredTeams[index]);
           },
         );
       },
     );
   }
 
-  Widget _createUserListItem(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
-    String userEmail = data['email'];
+  Widget _createTeamListItem(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    String teamName = data['name'];
+    String teamId = doc.id;
 
     return ListTile(
-      title: Text(userEmail),
+      title: Text(teamName),
       leading: Checkbox(
-        value: selectedUsers.contains(userEmail),
+        value: selectedTeams.contains(teamId),
         onChanged: (bool? value) {
           setState(() {
             if (value != null && value) {
-              selectedUsers.add(userEmail);
+              selectedTeams.add(teamId);
             } else {
-              selectedUsers.remove(userEmail);
+              selectedTeams.remove(teamId);
             }
           });
         },
@@ -135,42 +130,43 @@ class _ChooseUsersState extends State<ChooseUsers> {
     );
   }
 
-  void createTeam(
+  void createEvent(
     BuildContext context,
-    TextEditingController teamNameController,
-    List<String> selectedUsers,
+    List<String> selectedTeams,
   ) async {
-    final String? teamName = teamNameController.text.trim();
-    final String? captainId = FirebaseAuth.instance.currentUser?.uid;
+    final String? userId = _auth.currentUser?.uid;
 
-    if (teamName != null && captainId != null && selectedUsers.isNotEmpty) {
-      var userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(captainId)
-          .get();
-      selectedUsers.add(userDoc['email']);
-
-      DocumentReference teamRef =
-          FirebaseFirestore.instance.collection('teams').doc();
-
-      Map<String, dynamic> teamData = {
-        'id': teamRef.id,
-        'name': teamName,
-        'members': selectedUsers,
-        'createdBy': captainId,
-      };
-
+    if (userId != null && selectedTeams.isNotEmpty) {
       try {
-        await teamRef.set(teamData);
+        // Получение текущего времени
+        DateTime now = DateTime.now();
+
+        // Создание нового документа в коллекции "events"
+        DocumentReference eventRef =
+            FirebaseFirestore.instance.collection('events').doc();
+
+        // Данные для нового события
+        Map<String, dynamic> eventData = {
+          'id': eventRef.id,
+          'createdBy': userId,
+          'eventName': widget.eventName.text,
+          'members': selectedTeams,
+          'isActive': true,
+          'start': now,
+        };
+
+        // Сохранение данных в Firestore
+        await eventRef.set(eventData);
         Navigator.pushReplacement(
           // Изменение здесь
           context,
           MaterialPageRoute(
-            builder: (context) => MyTeamPage(
-              teamId: teamData['id'],
+            builder: (context) => MyEventPage(
+              eventId: eventData['id'],
             ),
           ),
         );
+        // Переход на другую страницу или выполнение другой логики
       } catch (e) {
         print('Ошибка при сохранении данных в Firestore: $e');
       }
@@ -180,9 +176,7 @@ class _ChooseUsersState extends State<ChooseUsers> {
         builder: (context) {
           return AlertDialog(
             title: Text('Ошибка'),
-            content: Text(
-              'Название команды и идентификатор капитана не могут быть пустыми, и должны быть выбраны участники',
-            ),
+            content: Text('Выберите хотя бы одну команду'),
             actions: [
               TextButton(
                 onPressed: () {

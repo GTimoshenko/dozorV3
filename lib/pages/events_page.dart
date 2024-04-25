@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/input_text_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/pages/choose_teams.dart';
 
 class EventPage extends StatefulWidget {
   const EventPage({Key? key});
@@ -62,7 +63,72 @@ class _EventPageState extends State<EventPage> {
                         height: 15,
                       ),
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          if (eventNamecontroller.text.isNotEmpty) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChooseTeams(
+                                  eventName: eventNamecontroller,
+                                ),
+                              ),
+                            );
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Пустое название квеста!'),
+                                  content: Text(
+                                    'Чтобы создать квест, введите его название.',
+                                  ),
+                                  actions: <Widget>[
+                                    ButtonBar(
+                                      alignment: MainAxisAlignment.center,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(
+                                                context); // Закрываем диалоговое окно
+                                          },
+                                          child: Text(
+                                            'OK',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          style: ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStateProperty.all<
+                                                    Color>(
+                                              const Color.fromARGB(
+                                                  255, 155, 132, 197),
+                                            ),
+                                            shape: MaterialStateProperty.all<
+                                                RoundedRectangleBorder>(
+                                              RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(18.0),
+                                                side: BorderSide(
+                                                  color: const Color.fromARGB(
+                                                      255, 155, 132, 197),
+                                                ),
+                                              ),
+                                            ),
+                                            minimumSize:
+                                                MaterialStateProperty.all(Size(
+                                                    200,
+                                                    48)), // Задаем фиксированный размер кнопки
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        },
                         child: Text("Далее"),
                         style: ButtonStyle(
                           minimumSize: MaterialStateProperty.all(Size(
