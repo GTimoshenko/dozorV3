@@ -17,7 +17,7 @@ class AuthService extends ChangeNotifier {
       _fireStore.collection('users').doc(userCredential.user!.uid).set({
         'uid': userCredential.user!.uid,
         'email': email,
-        'isVip': false,
+        'isAdmin': false,
       });
 
       return userCredential;
@@ -37,6 +37,7 @@ class AuthService extends ChangeNotifier {
       _fireStore.collection('users').doc(userCredential.user!.uid).set({
         'uid': userCredential.user!.uid,
         'email': email,
+        'isAdmin': false,
       }, SetOptions(merge: true));
 
       return userCredential;

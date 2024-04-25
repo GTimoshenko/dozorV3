@@ -79,15 +79,49 @@ class _TeamPageState extends State<TeamPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text('Пустое название команды'),
-                            content:
-                                Text('Пожалуйста, введите название команды.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text('OK'),
+                            title: Text('Пустое название команды!'),
+                            content: Text(
+                                'Чтобы создать команду, введите ее название.'),
+                            actions: <Widget>[
+                              ButtonBar(
+                                alignment: MainAxisAlignment
+                                    .center, // Выравнивание кнопки "OK" по центру
+                                children: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(
+                                          context); // Закрываем диалоговое окно
+                                    },
+                                    child: Text(
+                                      'OK',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              const Color.fromARGB(
+                                                  255,
+                                                  155,
+                                                  132,
+                                                  197)), // Цвет кнопки "OK"
+                                      shape: MaterialStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              18.0), // Задаем скругленные углы
+                                          side: BorderSide(
+                                              color: const Color.fromARGB(
+                                                  255,
+                                                  155,
+                                                  132,
+                                                  197)), // Добавляем обводку
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           );

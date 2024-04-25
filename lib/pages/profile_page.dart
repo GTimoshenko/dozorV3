@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/change_avatar_page.dart';
+import 'package:flutter_application_1/pages/register_page.dart';
 import 'about_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -10,6 +12,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
     String? email = user?.email;
+    String? userId = user?.uid;
 
     return Scaffold(
       body: Center(
@@ -53,55 +56,106 @@ class ProfilePage extends StatelessWidget {
               ),
 
               ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Поздравляем!'),
-                        content: Text(
-                            'Теперь вы стали организатором и можете создавать свои мероприятия.'),
-                        actions: <Widget>[
-                          ButtonBar(
-                            alignment: MainAxisAlignment
-                                .center, // Выравнивание кнопки "OK" по центру
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(
-                                      context); // Закрываем диалоговое окно
-                                },
-                                child: Text(
-                                  'OK',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          const Color.fromARGB(255, 155, 132,
-                                              197)), // Цвет кнопки "OK"
-                                  shape: MaterialStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          18.0), // Задаем скругленные углы
-                                      side: BorderSide(
-                                          color: const Color.fromARGB(255, 155,
-                                              132, 197)), // Добавляем обводку
+                onPressed: () async {
+                  try {
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    if (user != null) {
+                      // Обновляем поле isAdmin в Firestore
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.uid)
+                          .update({'isAdmin': true});
+
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Поздравляем!'),
+                            content: Text(
+                                'Теперь вы стали организатором и можете создавать свои мероприятия.'),
+                            actions: <Widget>[
+                              ButtonBar(
+                                alignment: MainAxisAlignment.center,
+                                children: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text(
+                                      'OK',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              const Color.fromARGB(
+                                                  255, 155, 132, 197)),
+                                      shape: MaterialStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(18.0),
+                                          side: BorderSide(
+                                              color: const Color.fromARGB(
+                                                  255, 155, 132, 197)),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
                             ],
-                          ),
-                        ],
+                          );
+                        },
                       );
-                    },
-                  );
+                    } else {
+                      print('Нет текущего пользователя.');
+                    }
+                  } catch (error) {
+                    print('Ошибка при обновлении поля isAdmin: $error');
+                  }
                 },
                 child: Text('Стать организатором'),
+              ),
+
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    // Получение текущего пользователя
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    if (user != null) {
+                      // 1. Удаление пользователя из Firebase Authentication
+                      await user.delete();
+
+                      // 2. Удаление информации о пользователе из Firestore
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId)
+                          .delete();
+
+                      print(
+                          'Пользователь с id $userId удален без возможности дальнейшей авторизации и восстановления.');
+                    } else {
+                      print('Нет текущего пользователя.');
+                    }
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RegisterPage(
+                          onTap: () {},
+                        ),
+                      ),
+                    );
+                  } catch (error) {
+                    print('Ошибка при удалении пользователя: $error');
+                  }
+                },
+                child: Text('Удалить аккаунт'),
               ),
             ],
           ),
