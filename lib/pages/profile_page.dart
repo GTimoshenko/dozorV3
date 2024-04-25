@@ -22,19 +22,15 @@ class ProfilePage extends StatelessWidget {
             children: [
               // Обернули аватар в InkWell
               InkWell(
-                onTap: () {
-                  // Переход на страницу изменения аватара при нажатии на аватарку
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ChangeAvatarPage()),
-                  );
-                },
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundImage:
-                      AssetImage('assets/images/default_avatar.png'),
-                ),
-              ),
+                  onTap: () {
+                    // Переход на страницу изменения аватара при нажатии на аватарку
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ChangeAvatarPage()),
+                    );
+                  },
+                  child: Icon(Icons.account_circle_outlined, size: 100)),
               SizedBox(height: 20),
               Text(
                 'Электронная почта:',
