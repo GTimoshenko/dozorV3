@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/input_text_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/pages/choose_teams.dart';
+import 'package:flutter_application_1/pages/my_events.dart';
 
 class EventPage extends StatefulWidget {
   const EventPage({Key? key});
@@ -139,7 +140,14 @@ class _EventPageState extends State<EventPage> {
                         height: 10,
                       ),
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MyEvents(),
+                            ),
+                          );
+                        },
                         child: Text("Посмотреть мои квесты"),
                         style: ButtonStyle(
                           minimumSize: MaterialStateProperty.all(Size(
