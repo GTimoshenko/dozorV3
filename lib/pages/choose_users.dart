@@ -22,25 +22,32 @@ class _ChooseUsersState extends State<ChooseUsers> {
   String _searchText = "";
   List<String> selectedUsers = [];
 
+  void _hideKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Выберите пользователей'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.arrow_forward_ios_outlined),
-            onPressed: () {
-              createTeam(context, widget.teamName, selectedUsers);
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildSearchField(),
-          Expanded(child: _createUserList()),
-        ],
+    return GestureDetector(
+      onTap: _hideKeyboard, // Hide keyboard when tapping anywhere on the screen
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Выберите пользователей'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.arrow_forward_ios_outlined),
+              onPressed: () {
+                createTeam(context, widget.teamName, selectedUsers);
+              },
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            _buildSearchField(),
+            Expanded(child: _createUserList()),
+          ],
+        ),
       ),
     );
   }
@@ -120,6 +127,15 @@ class _ChooseUsersState extends State<ChooseUsers> {
 
     return ListTile(
       title: Text(userEmail),
+      onTap: () {
+        setState(() {
+          if (selectedUsers.contains(userEmail)) {
+            selectedUsers.remove(userEmail);
+          } else {
+            selectedUsers.add(userEmail);
+          }
+        });
+      },
       leading: Checkbox(
         value: selectedUsers.contains(userEmail),
         onChanged: (bool? value) {
@@ -163,7 +179,6 @@ class _ChooseUsersState extends State<ChooseUsers> {
       try {
         await teamRef.set(teamData);
         Navigator.pushReplacement(
-          // Изменение здесь
           context,
           MaterialPageRoute(
             builder: (context) => MyTeamPage(

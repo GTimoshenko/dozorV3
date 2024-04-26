@@ -17,25 +17,32 @@ class _ChooseTeamsState extends State<ChooseTeams> {
   String _searchText = "";
   List<String> selectedTeams = [];
 
+  void _hideKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Выберите команды'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.check),
-            onPressed: () {
-              createEvent(context, selectedTeams);
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildSearchField(),
-          Expanded(child: _createTeamList()),
-        ],
+    return GestureDetector(
+      onTap: _hideKeyboard, // Hide keyboard when tapping anywhere on the screen
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Выберите команды'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.check),
+              onPressed: () {
+                createEvent(context, selectedTeams);
+              },
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            _buildSearchField(),
+            Expanded(child: _createTeamList()),
+          ],
+        ),
       ),
     );
   }
@@ -115,6 +122,15 @@ class _ChooseTeamsState extends State<ChooseTeams> {
 
     return ListTile(
       title: Text(teamName),
+      onTap: () {
+        setState(() {
+          if (selectedTeams.contains(teamId)) {
+            selectedTeams.remove(teamId);
+          } else {
+            selectedTeams.add(teamId);
+          }
+        });
+      },
       leading: Checkbox(
         value: selectedTeams.contains(teamId),
         onChanged: (bool? value) {
@@ -138,14 +154,10 @@ class _ChooseTeamsState extends State<ChooseTeams> {
 
     if (userId != null && selectedTeams.isNotEmpty) {
       try {
-        // Получение текущего времени
         DateTime now = DateTime.now();
-
-        // Создание нового документа в коллекции "events"
         DocumentReference eventRef =
             FirebaseFirestore.instance.collection('events').doc();
 
-        // Данные для нового события
         Map<String, dynamic> eventData = {
           'id': eventRef.id,
           'createdBy': userId,
@@ -155,10 +167,8 @@ class _ChooseTeamsState extends State<ChooseTeams> {
           'start': now,
         };
 
-        // Сохранение данных в Firestore
         await eventRef.set(eventData);
         Navigator.pushReplacement(
-          // Изменение здесь
           context,
           MaterialPageRoute(
             builder: (context) => MyEventPage(
@@ -166,7 +176,6 @@ class _ChooseTeamsState extends State<ChooseTeams> {
             ),
           ),
         );
-        // Переход на другую страницу или выполнение другой логики
       } catch (e) {
         print('Ошибка при сохранении данных в Firestore: $e');
       }

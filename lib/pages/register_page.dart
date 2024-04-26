@@ -13,7 +13,6 @@ class RegisterPage extends StatefulWidget {
   State<StatefulWidget> createState() => _RegisterPageState();
 }
 
-//регистрация пользователя
 class _RegisterPageState extends State<RegisterPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -26,7 +25,6 @@ class _RegisterPageState extends State<RegisterPage> {
           content: Text("Пароли не совпадают"),
         ),
       );
-
       return;
     }
 
@@ -44,54 +42,61 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  void _hideKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.deepPurpleAccent[1000],
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.remove_red_eye, size: 80),
-                Text("Приложение-квест"),
-                const SizedBox(height: 70),
-                Text("Давайте создадим вам аккаунт!"),
-                const SizedBox(height: 15),
-                MyTextField(
-                    controller: emailController,
-                    hintText: 'Email',
-                    obscureText: false),
-                const SizedBox(height: 10),
-                MyTextField(
-                    controller: passwordController,
-                    hintText: 'Пароль',
-                    obscureText: true),
-                const SizedBox(height: 15),
-                MyTextField(
-                    controller: confirmPasswordController,
-                    hintText: 'Повторите пароль',
-                    obscureText: true),
-                const SizedBox(height: 15),
-                MyButton(onTap: signUp, text: "Зарегистрироваться"),
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Уже есть аккаунт?"),
-                    const SizedBox(width: 5),
-                    GestureDetector(
-                      onTap: widget.onTap,
-                      child: const Text(
-                        "Войти",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  ],
-                )
-              ],
+    return GestureDetector(
+      onTap: _hideKeyboard, // Hide keyboard when tapping anywhere on the screen
+      child: Scaffold(
+        backgroundColor: Colors.deepPurpleAccent[1000],
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.remove_red_eye, size: 80),
+                  Text("Приложение-квест"),
+                  const SizedBox(height: 70),
+                  Text("Давайте создадим вам аккаунт!"),
+                  const SizedBox(height: 15),
+                  MyTextField(
+                      controller: emailController,
+                      hintText: 'Email',
+                      obscureText: false),
+                  const SizedBox(height: 10),
+                  MyTextField(
+                      controller: passwordController,
+                      hintText: 'Пароль',
+                      obscureText: true),
+                  const SizedBox(height: 15),
+                  MyTextField(
+                      controller: confirmPasswordController,
+                      hintText: 'Повторите пароль',
+                      obscureText: true),
+                  const SizedBox(height: 15),
+                  MyButton(onTap: signUp, text: "Зарегистрироваться"),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Уже есть аккаунт?"),
+                      const SizedBox(width: 5),
+                      GestureDetector(
+                        onTap: widget.onTap,
+                        child: const Text(
+                          "Войти",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         ),

@@ -16,9 +16,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-//авторизация пользователя
+
   void logIn() async {
-//получение данных от auth service
     final authService = Provider.of<AuthService>(context, listen: false);
     try {
       await authService.signInWithEmailandPassword(
@@ -34,49 +33,56 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _hideKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.deepPurpleAccent[1000],
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.remove_red_eye, size: 80),
-                Text("Приложение-квест"),
-                const SizedBox(height: 70),
-                Text("Давно не виделись!"),
-                const SizedBox(height: 10),
-                MyTextField(
-                    controller: emailController,
-                    hintText: 'Email',
-                    obscureText: false),
-                const SizedBox(height: 10),
-                MyTextField(
-                    controller: passwordController,
-                    hintText: 'Пароль',
-                    obscureText: true),
-                const SizedBox(height: 15),
-                MyButton(onTap: logIn, text: "Войти"),
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Нет аккаунта?"),
-                    SizedBox(width: 5),
-                    GestureDetector(
-                      onTap: widget.onTap,
-                      child: const Text(
-                        "Зарегистрируйтесь",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  ],
-                )
-              ],
+    return GestureDetector(
+      onTap: _hideKeyboard, // Hide keyboard when tapping anywhere on the screen
+      child: Scaffold(
+        backgroundColor: Colors.deepPurpleAccent[1000],
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.remove_red_eye, size: 80),
+                  Text("Приложение-квест"),
+                  const SizedBox(height: 70),
+                  Text("Давно не виделись!"),
+                  const SizedBox(height: 10),
+                  MyTextField(
+                      controller: emailController,
+                      hintText: 'Email',
+                      obscureText: false),
+                  const SizedBox(height: 10),
+                  MyTextField(
+                      controller: passwordController,
+                      hintText: 'Пароль',
+                      obscureText: true),
+                  const SizedBox(height: 15),
+                  MyButton(onTap: logIn, text: "Войти"),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Нет аккаунта?"),
+                      SizedBox(width: 5),
+                      GestureDetector(
+                        onTap: widget.onTap,
+                        child: const Text(
+                          "Зарегистрируйтесь",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         ),

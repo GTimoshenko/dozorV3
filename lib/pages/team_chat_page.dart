@@ -26,20 +26,27 @@ class _TeamChatPageState extends State<TeamChatPage> {
   final GroupChatService _groupChatService = GroupChatService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
+  void _hideKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('${widget.teamName}')),
-      body: Column(
-        children: [
-          Expanded(
-            child: _createMessageList(),
-          ),
-          _createMessageInput(),
-          const SizedBox(
-            height: 30,
-          )
-        ],
+    return GestureDetector(
+      onTap: _hideKeyboard, // Hide keyboard when tapping anywhere on the screen
+      child: Scaffold(
+        appBar: AppBar(title: Text('${widget.teamName}')),
+        body: Column(
+          children: [
+            Expanded(
+              child: _createMessageList(),
+            ),
+            _createMessageInput(),
+            const SizedBox(
+              height: 30,
+            )
+          ],
+        ),
       ),
     );
   }
@@ -77,19 +84,15 @@ class _TeamChatPageState extends State<TeamChatPage> {
           return const Text('Loading...');
         }
 
-        // Сортируем сообщения по timestamp в прямом порядке
         final sortedMessages = snapshot.data!.docs
             .where((document) =>
                 widget.receiverUserIds.contains(document['senderId']) &&
-                document['teamName'] ==
-                    widget
-                        .teamName) // Проверяем, что поле teamName совпадает с переданным в виджет
+                document['teamName'] == widget.teamName)
             .toList()
           ..sort((a, b) => (a['timestamp'] as Timestamp)
               .compareTo(b['timestamp'] as Timestamp));
 
         return ListView(
-          // Используем отсортированные сообщения
           children: sortedMessages
               .map((document) => _createMessageItem(document))
               .toList(),
@@ -113,8 +116,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            if (data['senderEmail'] != null) // Check if senderEmail exists
-              Text(data['senderEmail']),
+            if (data['senderEmail'] != null) Text(data['senderEmail']),
             const SizedBox(height: 7),
             ChatBubble(message: data['message']),
           ],

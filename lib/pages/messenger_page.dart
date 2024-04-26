@@ -23,17 +23,16 @@ class _HomePageState extends State<HomePage> {
   TextEditingController _searchController = TextEditingController();
   String _searchText = "";
   String pageName = "Команды";
-  late List<Widget> pages; // Объявляем список страниц здесь
+  late List<Widget> pages;
+
+  void _hideKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
 
   @override
   void initState() {
     super.initState();
-    pages = [
-      HomePage(),
-      EventPage(),
-      TeamPage(),
-      ProfilePage()
-    ]; // Инициализируем список страниц
+    pages = [HomePage(), EventPage(), TeamPage(), ProfilePage()];
   }
 
   void signOut() {
@@ -43,46 +42,46 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          pageName,
-          textAlign: TextAlign.center,
+    return GestureDetector(
+      onTap: _hideKeyboard, // Hide keyboard when tapping anywhere on the screen
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            pageName,
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            IconButton(
+              onPressed: signOut,
+              icon: Icon(Icons.logout_rounded),
+            ),
+          ],
+          centerTitle: true,
         ),
-        actions: [
-          IconButton(
-            onPressed: signOut,
-            icon: Icon(Icons.logout_rounded),
-          ),
-        ],
-        centerTitle: true,
-      ),
-      body: _currentIndex == 0
-          ? _buildBody()
-          : pages[
-              _currentIndex], // Используем pages[_currentIndex] для отображения выбранной страницы
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            label: "Мессенджер",
-            icon: Icon(Icons.message),
-          ),
-          BottomNavigationBarItem(
-            label: "Квесты",
-            icon: Icon(Icons.casino),
-          ),
-          BottomNavigationBarItem(
-            label: "Моя команда",
-            icon: Icon(Icons.people_rounded),
-          ),
-          BottomNavigationBarItem(
-            label: "Профиль",
-            icon: Icon(Icons.person),
-          ),
-        ],
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: _onItemSelected,
+        body: _currentIndex == 0 ? _buildBody() : pages[_currentIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          items: [
+            BottomNavigationBarItem(
+              label: "Мессенджер",
+              icon: Icon(Icons.message),
+            ),
+            BottomNavigationBarItem(
+              label: "Квесты",
+              icon: Icon(Icons.casino),
+            ),
+            BottomNavigationBarItem(
+              label: "Моя команда",
+              icon: Icon(Icons.people_rounded),
+            ),
+            BottomNavigationBarItem(
+              label: "Профиль",
+              icon: Icon(Icons.person),
+            ),
+          ],
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _currentIndex,
+          onTap: _onItemSelected,
+        ),
       ),
     );
   }
@@ -143,7 +142,7 @@ class _HomePageState extends State<HomePage> {
     });
     if (_currentIndex == 0) {
       pageName = "Чаты";
-      _searchText = ""; // Сбросить текст поиска при переходе на страницу "Чаты"
+      _searchText = "";
     }
     if (_currentIndex == 1) {
       pageName = "Квесты";
@@ -176,8 +175,7 @@ class _HomePageState extends State<HomePage> {
 
         return ListView(
           shrinkWrap: true,
-          physics:
-              ClampingScrollPhysics(), // Отключение прокрутки для списка пользователей
+          physics: ClampingScrollPhysics(),
           children: filteredUsers
               .map<Widget>((doc) => _createUserListItem(doc))
               .toList(),

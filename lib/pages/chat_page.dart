@@ -2,9 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/chat_bubble.dart';
-import 'package:flutter_application_1/components/my_text_field.dart';
-import 'package:flutter_application_1/services/chat/chat_service.dart';
 import 'package:flutter_application_1/components/input_text_field.dart';
+import 'package:flutter_application_1/services/chat/chat_service.dart';
 
 class ChatPage extends StatefulWidget {
   final String receiverUserEmail;
@@ -24,37 +23,39 @@ class _ChatPageState extends State<ChatPage> {
   final ChatService _chatService = ChatService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
+  void _hideKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
+
   void sendMessage() async {
     if (_messageController.text.isNotEmpty) {
       await _chatService.sendMessage(
           widget.receiverUserId, _messageController.text);
     }
-    //очистить поле ввода после отправки
     _messageController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.receiverUserEmail)),
-      body: Column(
-        children: [
-          //сообщения
-          Expanded(
-            child: _createMessageList(),
-          ),
-
-          //ввод пользователя
-          _createMessageInput(),
-          const SizedBox(
-            height: 30,
-          )
-        ],
+    return GestureDetector(
+      onTap: _hideKeyboard, // Hide keyboard when tapping anywhere on the screen
+      child: Scaffold(
+        appBar: AppBar(title: Text(widget.receiverUserEmail)),
+        body: Column(
+          children: [
+            Expanded(
+              child: _createMessageList(),
+            ),
+            _createMessageInput(),
+            const SizedBox(
+              height: 30,
+            )
+          ],
+        ),
       ),
     );
   }
 
-  //create message list
   Widget _createMessageList() {
     return StreamBuilder(
       stream: _chatService.getMessages(
@@ -76,7 +77,6 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  //create message item
   Widget _createMessageItem(DocumentSnapshot documentSnapshot) {
     Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
 
@@ -108,7 +108,6 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  //create message input
   Widget _createMessageInput() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
