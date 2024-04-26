@@ -14,16 +14,23 @@ class AuthService extends ChangeNotifier {
       UserCredential userCredential = await _firebaseAuth
           .signInWithEmailAndPassword(email: email, password: password);
 
-      _fireStore.collection('users').doc(userCredential.user!.uid).set({
-        'uid': userCredential.user!.uid,
-        'email': email,
-        'isAdmin': false,
-      });
+      DocumentSnapshot userSnapshot = await _fireStore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .get();
+      bool isAdmin = userSnapshot.get('isAdmin') ?? false;
+
+      _fireStore.collection('users').doc(userCredential.user!.uid).set(
+          {
+            'uid': userCredential.user!.uid,
+            'email': email,
+            'isAdmin': isAdmin,
+          },
+          SetOptions(
+              merge: true)); // Use merge option to update only isAdmin field
 
       return userCredential;
-    }
-    //ошибка
-    on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       throw Exception(e.code);
     }
   }

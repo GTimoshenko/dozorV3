@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/components/event_bubble.dart';
 import 'package:flutter_application_1/components/input_text_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/pages/choose_teams.dart';
@@ -14,7 +15,7 @@ class EventPage extends StatefulWidget {
 
 class _EventPageState extends State<EventPage> {
   final eventNamecontroller = TextEditingController();
-
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
@@ -161,12 +162,48 @@ class _EventPageState extends State<EventPage> {
             ),
           );
         } else {
-          return Scaffold(
-            body: Center(
-              child: Text(
-                "Упс, здесь скоро будут твои квесты",
-              ),
-            ),
+          return StreamBuilder<QuerySnapshot>(
+            stream: _firestore.collection('events').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
+                );
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              final events = snapshot.data!.docs;
+
+              return ListView.builder(
+                itemCount: events.length,
+                itemBuilder: (context, index) {
+                  final event = events[index];
+                  final eventId = event.id;
+                  final createdBy = event['createdBy'];
+                  final eventName = event['eventName'];
+                  final members = List<String>.from(event['members']);
+                  final isActive = event['isActive'];
+                  final start = (event['start'] as Timestamp).toDate();
+
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: EventBubble(
+                      eventId: eventId,
+                      createdBy: createdBy,
+                      eventName: eventName,
+                      members: members,
+                      isActive: isActive,
+                      start: start,
+                    ),
+                  );
+                },
+              );
+            },
           );
         }
 
