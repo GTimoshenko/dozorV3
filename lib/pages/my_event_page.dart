@@ -29,29 +29,45 @@ class MyEventPage extends StatelessWidget {
           if (!snapshot.hasData || !snapshot.data!.exists) {
             return Center(child: Text('Данные о мероприятии не найдены'));
           }
-          // Получаем данные о мероприятии из snapshot
+
           Map<String, dynamic> eventData =
               snapshot.data!.data() as Map<String, dynamic>;
-          // Преобразуем Timestamp в DateTime
           DateTime start = (eventData['start'] as Timestamp).toDate();
-          // Преобразуем список участников к типу List<String>
           List<String> members = (eventData['members'] as List).cast<String>();
-          return Column(
-            mainAxisSize:
-                MainAxisSize.min, // Здесь устанавливаем минимальный размер оси
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: EventBubble(
-                  eventId: eventId,
-                  createdBy: eventData['createdBy'],
-                  eventName: eventData['eventName'],
-                  members: members,
-                  isActive: eventData['isActive'],
-                  start: start,
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 300,
+                ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: EventBubble(
+                        eventId: eventId,
+                        createdBy: eventData['createdBy'],
+                        eventName: eventData['eventName'],
+                        members: members,
+                        isActive: eventData['isActive'],
+                        start: start,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 300,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Действия при нажатии на кнопку
+                        },
+                        child: Text('Сделать объявление'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           );
         },
       ),

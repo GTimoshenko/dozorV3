@@ -136,6 +136,78 @@ class ProfilePage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   try {
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    if (user != null) {
+                      // Обновляем поле isAdmin в Firestore
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.uid)
+                          .update({'isAdmin': false});
+
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Поздравляем!'),
+                            content: Text(
+                                'Теперь вы стали игроком и можете участвовать в квестах.'),
+                            actions: <Widget>[
+                              ButtonBar(
+                                alignment: MainAxisAlignment.center,
+                                children: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text(
+                                      'OK',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              const Color.fromARGB(
+                                                  255, 155, 132, 197)),
+                                      shape: MaterialStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(18.0),
+                                          side: BorderSide(
+                                              color: const Color.fromARGB(
+                                                  255, 155, 132, 197)),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    } else {
+                      print('Нет текущего пользователя.');
+                    }
+                  } catch (error) {
+                    print('Ошибка при обновлении поля isAdmin: $error');
+                  }
+                },
+                child: Text('Стать участником'),
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(
+                      Size(200, 48)), // Задаем фиксированный размер кнопки
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
                     // Получение текущего пользователя
                     final user = FirebaseAuth.instance.currentUser;
 

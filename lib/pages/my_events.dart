@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/components/event_bubble.dart';
+import 'package:flutter_application_1/pages/my_event_page.dart'; // Import the MyEventPage class
 
 class MyEvents extends StatefulWidget {
   const MyEvents({super.key});
@@ -54,15 +55,25 @@ class _MyEventsState extends State<MyEvents> {
                     final isActive = event['isActive'];
                     final start = (event['start'] as Timestamp).toDate();
 
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: EventBubble(
-                        eventId: eventId,
-                        createdBy: createdBy,
-                        eventName: eventName,
-                        members: members,
-                        isActive: isActive,
-                        start: start,
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyEventPage(eventId: eventId),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: EventBubble(
+                          eventId: eventId,
+                          createdBy: createdBy,
+                          eventName: eventName,
+                          members: members,
+                          isActive: isActive,
+                          start: start,
+                        ),
                       ),
                     );
                   },
