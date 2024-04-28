@@ -71,6 +71,9 @@ class _TeamPageState extends State<TeamPage> {
                             builder: (context) => ChooseUsers(
                               teamName: teamNameController,
                               isNew: true,
+                              add: false,
+                              remove: false,
+                              teamId: "",
                             ),
                           ),
                         );

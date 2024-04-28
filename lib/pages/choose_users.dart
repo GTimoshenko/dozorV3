@@ -9,8 +9,17 @@ import 'chat_page.dart';
 class ChooseUsers extends StatefulWidget {
   final TextEditingController teamName;
   final bool isNew;
-  const ChooseUsers({Key? key, required this.teamName, required this.isNew})
-      : super(key: key);
+  final bool add;
+  final bool remove;
+  final String teamId;
+  const ChooseUsers({
+    Key? key,
+    required this.teamName,
+    required this.isNew,
+    required this.add,
+    required this.remove,
+    required this.teamId,
+  }) : super(key: key);
 
   @override
   State<ChooseUsers> createState() => _ChooseUsersState();
@@ -34,6 +43,7 @@ class _ChooseUsersState extends State<ChooseUsers> {
         appBar: AppBar(
           title: Text('Выберите пользователей'),
           actions: [
+            // Only show the 'Next' button if not adding to an existing team
             IconButton(
               icon: Icon(Icons.arrow_forward_ios_outlined),
               onPressed: () {
@@ -160,34 +170,48 @@ class _ChooseUsersState extends State<ChooseUsers> {
     final String? captainId = FirebaseAuth.instance.currentUser?.uid;
 
     if (teamName != null && captainId != null && selectedUsers.isNotEmpty) {
-      var userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(captainId)
-          .get();
-      selectedUsers.add(userDoc['email']);
+      if (widget.add) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('teams')
+              .doc(widget.teamId)
+              .update({
+            'members': FieldValue.arrayUnion(selectedUsers),
+          });
+          Navigator.pop(context); // Close the ChooseUsers screen
+        } catch (e) {
+          print('Ошибка при обновлении данных в Firestore: $e');
+        }
+      } else {
+        var userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(captainId)
+            .get();
+        selectedUsers.add(userDoc['email']);
 
-      DocumentReference teamRef =
-          FirebaseFirestore.instance.collection('teams').doc();
+        DocumentReference teamRef =
+            FirebaseFirestore.instance.collection('teams').doc();
 
-      Map<String, dynamic> teamData = {
-        'id': teamRef.id,
-        'name': teamName,
-        'members': selectedUsers,
-        'createdBy': captainId,
-      };
+        Map<String, dynamic> teamData = {
+          'id': teamRef.id,
+          'name': teamName,
+          'members': selectedUsers,
+          'createdBy': captainId,
+        };
 
-      try {
-        await teamRef.set(teamData);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MyTeamPage(
-              teamId: teamData['id'],
+        try {
+          await teamRef.set(teamData);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MyTeamPage(
+                teamId: teamData['id'],
+              ),
             ),
-          ),
-        );
-      } catch (e) {
-        print('Ошибка при сохранении данных в Firestore: $e');
+          );
+        } catch (e) {
+          print('Ошибка при сохранении данных в Firestore: $e');
+        }
       }
     } else {
       showDialog(

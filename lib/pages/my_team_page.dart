@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/components/team_bubble.dart';
+import 'package:flutter_application_1/pages/choose_users.dart';
 import 'package:flutter_application_1/pages/my_teams.dart';
 import 'package:flutter_application_1/pages/team_chat_page.dart';
 
@@ -60,7 +61,8 @@ class MyTeamPage extends StatelessWidget {
           var teamName = teamData['name'] ?? 'Название не указано';
           var captainId = teamData['createdBy'] ?? 'Капитан не указан';
           var members = List<String>.from(teamData['members']);
-
+          TextEditingController teamNameController =
+              TextEditingController(text: teamName);
           return Column(
             children: [
               Align(
@@ -83,7 +85,17 @@ class MyTeamPage extends StatelessWidget {
                 width: 300, // Растягиваем кнопку на всю доступную ширину
                 child: ElevatedButton(
                   onPressed: () {
-                    // Действия при нажатии на кнопку "Добавить участника"
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChooseUsers(
+                            teamName: teamNameController,
+                            isNew: false,
+                            add: true,
+                            remove: false,
+                            teamId: teamId),
+                      ),
+                    );
                   },
                   child: Text('Добавить участника'),
                 ),
