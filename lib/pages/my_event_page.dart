@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/components/event_bubble.dart';
+import 'package:flutter_application_1/components/input_text_field.dart';
+import 'package:flutter_application_1/components/my_text_field.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-class MyEventPage extends StatelessWidget {
+class MyEventPage extends StatefulWidget {
   final String eventId;
 
   const MyEventPage({Key? key, required this.eventId}) : super(key: key);
+
+  @override
+  _MyEventPageState createState() => _MyEventPageState();
+}
+
+class _MyEventPageState extends State<MyEventPage> {
+  final TextEditingController _messageController = TextEditingController();
+  Map<String, bool> shownToasts =
+      {}; // Карта для отслеживания показанных уведомлений
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +28,7 @@ class MyEventPage extends StatelessWidget {
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection('events')
-            .doc(eventId)
+            .doc(widget.eventId)
             .snapshots(),
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
@@ -47,7 +59,7 @@ class MyEventPage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: EventBubble(
-                        eventId: eventId,
+                        eventId: widget.eventId,
                         createdBy: eventData['createdBy'],
                         eventName: eventData['eventName'],
                         members: members,
@@ -55,11 +67,47 @@ class MyEventPage extends StatelessWidget {
                         start: start,
                       ),
                     ),
+                    CustomInputTextField(
+                      controller: _messageController,
+                      hintText: "Введите объявление",
+                      obscureText: false,
+                      textCapitalization: TextCapitalization.words,
+                    ),
+                    SizedBox(height: 16.0),
                     SizedBox(
                       width: 300,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           // Действия при нажатии на кнопку
+                          String message = _messageController.text;
+                          await Future.forEach(members, (member) async {
+                            if (!shownToasts.containsKey(member) ||
+                                !shownToasts[member]!) {
+                              await Fluttertoast.showToast(
+                                msg: '$message',
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.TOP,
+                                backgroundColor: Colors.grey,
+                                textColor: Colors.white,
+                              );
+
+// Wrap the toast message in a GestureDetector to handle tap events
+                              GestureDetector(
+                                onTap: () {
+                                  // Define the action to take when the toast message is tapped
+                                  shownToasts[member] = true;
+                                  Fluttertoast.cancel();
+                                },
+                                child: SizedBox
+                                    .shrink(), // Use an empty SizedBox to make the GestureDetector cover the entire toast message area
+                              );
+
+                              shownToasts[member] =
+                                  false; // Отмечаем, что уведомление было показано
+                            }
+                          });
+                          _messageController
+                              .clear(); // Очищаем текстовое поле после отправки
                         },
                         child: Text('Сделать объявление'),
                       ),
