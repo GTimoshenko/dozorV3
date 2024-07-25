@@ -21,6 +21,72 @@ class _EventPageState extends State<EventPage> {
     FocusScope.of(context).unfocus();
   }
 
+  final List<Map<String, Object>> _questions = [
+    {
+      'question': 'Какого цвета небо?',
+      'answers': [
+        {'text': 'Синий', 'score': 1},
+        {'text': 'Зелёный', 'score': 0},
+        {'text': 'Красный', 'score': 0},
+        {'text': 'Чёрный', 'score': 0},
+      ],
+    },
+    {
+      'question': 'Сколько ног у паука?',
+      'answers': [
+        {'text': '6', 'score': 0},
+        {'text': '8', 'score': 1},
+        {'text': '10', 'score': 0},
+        {'text': '12', 'score': 0},
+      ],
+    },
+    // Добавьте остальные вопросы в аналогичном формате
+    {
+      'question': 'Какой сейчас год?',
+      'answers': [
+        {'text': '2022', 'score': 0},
+        {'text': '2023', 'score': 1},
+        {'text': '2024', 'score': 0},
+        {'text': '2025', 'score': 0},
+      ],
+    },
+    {
+      'question': 'Как зовут главного героя романа "Преступление и наказание"?',
+      'answers': [
+        {'text': 'Родион', 'score': 1},
+        {'text': 'Роман', 'score': 0},
+        {'text': 'Алексей', 'score': 0},
+        {'text': 'Иван', 'score': 0},
+      ],
+    },
+    {
+      'question': 'Столица Франции?',
+      'answers': [
+        {'text': 'Лондон', 'score': 0},
+        {'text': 'Париж', 'score': 1},
+        {'text': 'Берлин', 'score': 0},
+        {'text': 'Мадрид', 'score': 0},
+      ],
+    },
+  ];
+
+  int _questionIndex = 0;
+  int _totalScore = 0;
+
+  void _answerQuestion(int score) {
+    _totalScore += score;
+    setState(() {
+      _questionIndex++;
+    });
+  }
+
+  void _resetQuiz() {
+    setState(() {
+      _questionIndex = 0;
+      _totalScore = 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
@@ -169,53 +235,125 @@ class _EventPageState extends State<EventPage> {
               ),
             );
           } else {
-            return StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('events').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
-                }
-
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                final events = snapshot.data!.docs;
-
-                return ListView.builder(
-                  itemCount: events.length,
-                  itemBuilder: (context, index) {
-                    final event = events[index];
-                    final eventId = event.id;
-                    final createdBy = event['createdBy'];
-                    final eventName = event['eventName'];
-                    final members = List<String>.from(event['members']);
-                    final isActive = event['isActive'];
-                    final start = (event['start'] as Timestamp).toDate();
-
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: EventBubble(
-                        eventId: eventId,
-                        createdBy: createdBy,
-                        eventName: eventName,
-                        members: members,
-                        isActive: isActive,
-                        start: start,
-                      ),
-                    );
-                  },
-                );
-              },
+            return Scaffold(
+              appBar: AppBar(
+                title: Text('Опрос'),
+              ),
+              body: _questionIndex < _questions.length
+                  ? Quiz(
+                      questions: _questions,
+                      questionIndex: _questionIndex,
+                      answerQuestion: _answerQuestion,
+                    )
+                  : Result(_totalScore, _resetQuiz),
             );
           }
 
           // Если пользователь не является администратором, вернуть пустой контейнер
         },
+      ),
+    );
+  }
+}
+
+class Quiz extends StatelessWidget {
+  final List<Map<String, Object>> questions;
+  final int questionIndex;
+  final Function answerQuestion;
+
+  Quiz({
+    required this.questions,
+    required this.questionIndex,
+    required this.answerQuestion,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Question(
+          questions[questionIndex]['question'] as String,
+        ),
+        ...(questions[questionIndex]['answers'] as List<Map<String, Object>>)
+            .map((answer) {
+          return Answer(
+            () => answerQuestion(answer['score'] as int),
+            answer['text'] as String,
+          );
+        }).toList(),
+      ],
+    );
+  }
+}
+
+class Question extends StatelessWidget {
+  final String questionText;
+
+  Question(this.questionText);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.all(10),
+      child: Text(
+        questionText,
+        style: TextStyle(fontSize: 28),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+class Answer extends StatelessWidget {
+  final Function selectHandler;
+  final String answerText;
+
+  Answer(this.selectHandler, this.answerText);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 30),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+        ),
+        child: Text(answerText),
+        onPressed: () => selectHandler(),
+      ),
+    );
+  }
+}
+
+class Result extends StatelessWidget {
+  final int resultScore;
+  final Function resetHandler;
+
+  Result(this.resultScore, this.resetHandler);
+
+  String get resultPhrase {
+    return 'Ваш результат: $resultScore';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            resultPhrase,
+            style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          ElevatedButton(
+            child: Text('Пройти снова'),
+            onPressed: () => resetHandler(),
+          ),
+        ],
       ),
     );
   }
