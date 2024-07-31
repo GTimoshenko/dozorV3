@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../utils/question.dart';
+import '../utils/quiz.dart';
+import 'all_quizzes_page.dart';
 
 class EventPage extends StatefulWidget {
   const EventPage({super.key});
@@ -198,55 +201,6 @@ class _EventPageState extends State<EventPage> {
   }
 }
 
-class AllQuizzesPage extends StatelessWidget {
-  final bool isAdmin;
-
-  AllQuizzesPage({required this.isAdmin});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Все квесты")),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('quizzes').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text("Пока нет доступных квестов."));
-          }
-          return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index) {
-              var quiz = Quiz.fromMap(
-                  snapshot.data!.docs[index].data() as Map<String, dynamic>);
-              return ListTile(
-                title: Text(quiz.title),
-                subtitle: Text("${quiz.questions.length} вопрос(ов)"),
-                onTap: () {
-                  if (isAdmin) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QuizDetailPage(quiz: quiz),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(
-                            "У вас недостаточно прав, чтобы просматривать этот раздел.")));
-                  }
-                },
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
 class QuizDetailPage extends StatelessWidget {
   final Quiz quiz;
 
@@ -274,7 +228,7 @@ class QuizDetailPage extends StatelessWidget {
                       int optionIndex = entry.key;
                       String option = entry.value;
                       return Text(
-                          "${optionIndex + 1}. $option ${question.correctAnswers.contains(optionIndex) ? '(Правильный)' : ''}");
+                          "${optionIndex + 1}. $option ${question.correctAnswers.contains(optionIndex) ? '✅' : '❌'}");
                     }).toList(),
                   ],
                 ),
@@ -283,53 +237,6 @@ class QuizDetailPage extends StatelessWidget {
           },
         ),
       ),
-    );
-  }
-}
-
-class Question {
-  String questionText;
-  List<String> options;
-  List<int> correctAnswers;
-
-  Question(
-      {required this.questionText,
-      required this.options,
-      required this.correctAnswers});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'questionText': questionText,
-      'options': options,
-      'correctAnswers': correctAnswers,
-    };
-  }
-}
-
-class Quiz {
-  String title;
-  List<Question> questions;
-
-  Quiz({required this.title, required this.questions});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'title': title,
-      'questions': questions.map((q) => q.toMap()).toList(),
-    };
-  }
-
-  factory Quiz.fromMap(Map<String, dynamic> map) {
-    return Quiz(
-      title: map['title'],
-      questions: (map['questions'] as List)
-          .map((q) => Question(
-                questionText: q['questionText'],
-                options: List<String>.from(q['options']),
-                correctAnswers: List<int>.from(
-                    q['correctAnswers'] ?? []), // Handle null case
-              ))
-          .toList(),
     );
   }
 }

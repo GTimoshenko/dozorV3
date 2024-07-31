@@ -1,3 +1,5 @@
+import 'question.dart';
+
 class Quiz {
   String title;
   List<Question> questions;
@@ -10,18 +12,18 @@ class Quiz {
       'questions': questions.map((q) => q.toMap()).toList(),
     };
   }
-}
 
-class Question {
-  String questionText;
-  List<String> options;
-
-  Question({required this.questionText, required this.options});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'questionText': questionText,
-      'options': options,
-    };
+  factory Quiz.fromMap(Map<String, dynamic> map) {
+    return Quiz(
+      title: map['title'],
+      questions: (map['questions'] as List)
+          .map((q) => Question(
+                questionText: q['questionText'],
+                options: List<String>.from(q['options']),
+                correctAnswers: List<int>.from(
+                    q['correctAnswers'] ?? []), // Handle null case
+              ))
+          .toList(),
+    );
   }
 }
