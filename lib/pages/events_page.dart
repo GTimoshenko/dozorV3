@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'create_quiz_page.dart';
-import 'all_quizzes_page.dart';
 import '../utils/quiz.dart';
+import 'all_quizzes_page.dart';
 
 class EventPage extends StatefulWidget {
   const EventPage({super.key});
