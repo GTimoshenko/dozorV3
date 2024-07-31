@@ -15,4 +15,12 @@ class Question {
       'correctAnswers': correctAnswers,
     };
   }
+
+  factory Question.fromMap(Map<String, dynamic> map) {
+    return Question(
+      questionText: map['questionText'] ?? '',
+      options: List<String>.from(map['options']),
+      correctAnswers: List<int>.from(map['correctAnswers']),
+    );
+  }
 }

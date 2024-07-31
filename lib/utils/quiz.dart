@@ -15,15 +15,9 @@ class Quiz {
 
   factory Quiz.fromMap(Map<String, dynamic> map) {
     return Quiz(
-      title: map['title'],
-      questions: (map['questions'] as List)
-          .map((q) => Question(
-                questionText: q['questionText'],
-                options: List<String>.from(q['options']),
-                correctAnswers: List<int>.from(
-                    q['correctAnswers'] ?? []), // Handle null case
-              ))
-          .toList(),
+      title: map['title'] ?? '',
+      questions: List<Question>.from(
+          map['questions']?.map((q) => Question.fromMap(q)) ?? []),
     );
   }
 }

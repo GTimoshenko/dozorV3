@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/quiz.dart';
-import 'events_page.dart';
+import 'quiz_detail_page.dart';
 
 class AllQuizzesPage extends StatelessWidget {
   final bool isAdmin;
@@ -29,20 +29,16 @@ class AllQuizzesPage extends StatelessWidget {
               return ListTile(
                 title: Text(quiz.title),
                 subtitle: Text("${quiz.questions.length} вопрос(ов)"),
-                onTap: () {
-                  if (isAdmin) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QuizDetailPage(quiz: quiz),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(
-                            "У вас недостаточно прав, чтобы просматривать этот раздел.")));
-                  }
-                },
+                onTap: isAdmin
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => QuizDetailPage(quiz: quiz),
+                          ),
+                        );
+                      }
+                    : null,
               );
             },
           );
