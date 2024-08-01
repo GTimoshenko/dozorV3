@@ -16,7 +16,7 @@ class AllQuizzesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: isAdmin ? AppBar(title: Text("Все квесты")) : null,
+      appBar: isAdmin ? AppBar(title: Text("Квесты")) : null,
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('quizzes').snapshots(),
         builder: (context, snapshot) {
@@ -26,40 +26,60 @@ class AllQuizzesPage extends StatelessWidget {
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(child: Text("Пока нет доступных квестов."));
           }
+
+          // Group quizzes by enterprise
+          Map<String, List<DocumentSnapshot>> groupedQuizzes = {};
+          for (var doc in snapshot.data!.docs) {
+            var data = doc.data() as Map<String, dynamic>;
+            String enterprise = data['enterprise'] ?? 'Другие предприятия';
+            if (!groupedQuizzes.containsKey(enterprise)) {
+              groupedQuizzes[enterprise] = [];
+            }
+            groupedQuizzes[enterprise]!.add(doc);
+          }
+
           return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
+            itemCount: groupedQuizzes.length,
             itemBuilder: (context, index) {
-              var quiz = Quiz.fromMap(
-                  snapshot.data!.docs[index].data() as Map<String, dynamic>);
-              var quizId = snapshot.data!.docs[index].id;
-              return ListTile(
-                title: Text(quiz.title),
-                subtitle: Text("${quiz.questions.length} вопрос(ов)"),
-                trailing: isAdmin
-                    ? IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          _deleteQuiz(quizId);
-                        },
-                      )
-                    : null,
-                onTap: () {
-                  if (isAdmin) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QuizDetailPage(quiz: quiz),
-                      ),
-                    );
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QuizTakingPage(quiz: quiz),
-                      ),
-                    );
-                  }
-                },
+              String enterprise = groupedQuizzes.keys.elementAt(index);
+              List<DocumentSnapshot> quizzes = groupedQuizzes[enterprise]!;
+
+              return ExpansionTile(
+                title: Text(enterprise),
+                children: quizzes.map((doc) {
+                  var quiz = Quiz.fromMap(doc.data() as Map<String, dynamic>);
+                  var quizId = doc.id;
+
+                  return ListTile(
+                    title: Text(quiz.title),
+                    subtitle: Text("${quiz.questions.length} вопрос(ов)"),
+                    trailing: isAdmin
+                        ? IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              _deleteQuiz(quizId);
+                            },
+                          )
+                        : null,
+                    onTap: () {
+                      if (isAdmin) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => QuizDetailPage(quiz: quiz),
+                          ),
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => QuizTakingPage(quiz: quiz),
+                          ),
+                        );
+                      }
+                    },
+                  );
+                }).toList(),
               );
             },
           );
