@@ -66,14 +66,16 @@ class AllQuizzesPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => QuizDetailPage(quiz: quiz),
+                            builder: (context) =>
+                                QuizDetailPage(quiz: quiz, quizId: quizId),
                           ),
                         );
                       } else {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => QuizTakingPage(quiz: quiz),
+                            builder: (context) =>
+                                QuizTakingPage(quiz: quiz, quizId: quizId),
                           ),
                         );
                       }

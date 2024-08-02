@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../utils/quiz.dart';
+import 'leaderboard_page.dart';
 
 class QuizDetailPage extends StatelessWidget {
   final Quiz quiz;
+  final String quizId;
 
-  QuizDetailPage({required this.quiz});
+  QuizDetailPage({required this.quiz, required this.quizId});
 
   @override
   Widget build(BuildContext context) {
@@ -12,29 +14,46 @@ class QuizDetailPage extends StatelessWidget {
       appBar: AppBar(title: Text(quiz.title)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: quiz.questions.length,
-          itemBuilder: (context, index) {
-            var question = quiz.questions[index];
-            return Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Q${index + 1}: ${question.questionText}",
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    ...question.options.asMap().entries.map((entry) {
-                      int optionIndex = entry.key;
-                      String option = entry.value;
-                      return Text(
-                          "${optionIndex + 1}. $option ${question.correctAnswers.contains(optionIndex) ? '✅' : '❌'}");
-                    }).toList(),
-                  ],
-                ),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: quiz.questions.length,
+                itemBuilder: (context, index) {
+                  var question = quiz.questions[index];
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Q${index + 1}: ${question.questionText}",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          ...question.options.asMap().entries.map((entry) {
+                            int optionIndex = entry.key;
+                            String option = entry.value;
+                            return Text(
+                                "${optionIndex + 1}. $option ${question.correctAnswers.contains(optionIndex) ? '✅' : '❌'}");
+                          }).toList(),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LeaderboardPage(quiz: quiz),
+                  ),
+                );
+              },
+              child: Text('Посмотреть таблицу лидеров'),
+            ),
+          ],
         ),
       ),
     );

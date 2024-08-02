@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/quiz.dart';
+import '../utils/quiz_result.dart';
+import 'leaderboard_page.dart';
 
 class QuizTakingPage extends StatefulWidget {
   final Quiz quiz;
+  final String quizId;
 
-  QuizTakingPage({required this.quiz});
+  QuizTakingPage({required this.quiz, required this.quizId});
 
   @override
   _QuizTakingPageState createState() => _QuizTakingPageState();
@@ -26,7 +31,7 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
     });
   }
 
-  void _submitQuiz() {
+  void _submitQuiz() async {
     int correctAnswers = 0;
 
     widget.quiz.questions.asMap().forEach((index, question) {
@@ -38,6 +43,20 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
       }
     });
 
+    User? user = FirebaseAuth.instance.currentUser;
+    String playerName = user?.email ?? "Unknown Player";
+
+    // Save the result in the leaderboard
+    widget.quiz.addResult(QuizResult(
+        playerName: playerName,
+        score: correctAnswers)); // Use the current user's email
+
+    // Update Firestore
+    await FirebaseFirestore.instance
+        .collection('quizzes')
+        .doc(widget.quizId)
+        .update(widget.quiz.toMap());
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -48,7 +67,11 @@ class _QuizTakingPageState extends State<QuizTakingPage> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => LeaderboardPage(quiz: widget.quiz),
+                ),
+              );
             },
             child: Text("ОК"),
           ),
